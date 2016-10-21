@@ -13,3 +13,21 @@
  *= require_tree .
  *= require_self
  */
+
+html {
+  font-family: helvetica;
+}
+
+a {
+  color: royalblue;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+.wrapper {
+  margin: 50px auto;
+  width: 900px;
+  max-width: 88%;
+}
