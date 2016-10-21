@@ -35,3 +35,20 @@ rake db:migrate
 ```
 
 You should now be able to restart the app with `rails server` and visit `http://localhost:3000/posts` to see the functionality we've added.
+
+# Step 3: Add root route
+
+We have our post scaffold, but when we visit `http://localhost:3000/`, we still see the getting start page.
+Let's fix that by setting the "root route" in `config/routes.rb`.
+
+```ruby
+Rails.application.routes.draw do
+  resources :posts
+
+  root to: "posts#index"
+end
+```
+
+Now we can visit `http://localhost:3000/` and see the list of posts.
+
+
