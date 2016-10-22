@@ -279,3 +279,54 @@ In `app/views/layouts/application.html.erb`:
   <%= yield %>
 </div>
 ```
+
+## Step 7: Protect new / edit post views
+
+We have Sign in / sign out for Authors, but currently that doesn't do anything.
+
+Let's go ahead and disable registrations so people can't sign up for new accounts.
+
+In `app/models/author.rb`, let's remove `:registerable`:
+
+```ruby
+class Author < ApplicationRecord
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable,
+         :recoverable,
+         :rememberable,
+         :trackable,
+         :validatable
+end
+```
+
+Now we'll see an error if we try to visit `http://localhost:3000/authors/sign_up`.
+
+Next, let's protect the new, edit, update, create, and destroy actions in our posts controller at `app/controllers/posts_controller.rb`:
+
+```ruby
+before_action :authenticate_author!, only: [:new, :edit, :update, :create, :destroy]
+```
+
+Now if we try to edit or remove a post we'll see a message telling us to sign in first.
+
+Finally, let's hide the new / edit links for people who are not signed in.
+
+In `app/views/posts/index.html.erb`:
+
+```erb
+<% if author_signed_in? %>
+  <%= link_to 'New Post', new_post_path %>
+<% end %>
+```
+
+...and in `app/views/posts/show.html.erb`:
+
+```erb
+<% if author_signed_in? %>
+  <%= link_to 'Edit', edit_post_path(@post) %> |
+  <%= link_to 'Back', posts_path %>
+<% end %>
+```
+
+And that's it. Now we have a functioning blog!
