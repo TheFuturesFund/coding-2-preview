@@ -10,6 +10,16 @@
 
   <body>
     <div class="wrapper">
+      <p class="notice"><%= notice %></p>
+      <p class="alert"><%= alert %></p>
+
+      <% if author_signed_in? %>
+        Signed in as <%= current_author.email %>.
+        <%= link_to "Sign out", destroy_author_session_path, method: :delete %>
+      <% else %>
+        <%= link_to "Author sign in", new_author_session_path %>
+      <% end %>
+
       <%= yield %>
     </div>
   </body>

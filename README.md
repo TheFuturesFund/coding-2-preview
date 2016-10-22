@@ -112,7 +112,7 @@ a:hover {
 }
 ```
 
-# Step 5: Add comments
+## Step 5: Add comments
 
 Now we have a blog that is looking pretty nice. Let's add commenting.
 Comments don't need all the functionality of a scaffold, so let's bootstrap them ourselves.
@@ -220,4 +220,62 @@ In order to use `@comment` in the view we need to add it to the posts controller
 def show
   @comment = Comment.new
 end
+```
+## Step 6: Setup authentication
+
+Our blog is looking good, but anyone can add posts which is not what we want.
+Let's use the [Devise gem](https://github.com/plataformatec/devise) to protect those pages with a username / password.
+
+First, we'll add the Devise gem to the Gemfile.
+
+```ruby
+gem "devise"
+```
+
+Next, let's run `bundle install` on the command line to install the gem.
+Then, we'll run `rails generate devise:install` to add Devise to our app.
+
+```shell
+bundle install
+rails generate devise:install
+```
+
+Let's add alerts and notices to our layout in `app/views/layout/application.html.erb` so errors will display properly:
+
+```erb
+<div class="wrapper">
+  <p class="notice"><%= notice %></p>
+  <p class="alert"><%= alert %></p>
+  <%= yield %>
+</div>
+```
+
+Now that Devise is all setup, we need to generate an `Author` model to handle the author's data.
+To do that, let's run the following on the command line:
+
+```shell
+rails generate devise Author
+rails db:migrate
+```
+
+Now, we can start our server and go to `http://localhost:3000/authors/sign_up` to create an account.
+We can also visit `http://localhost:3000/authors/sign_in` if we aren't signed in to sign in.
+
+Let's add some UI to handle sign ins and sign outs.
+In `app/views/layouts/application.html.erb`:
+
+```erb
+<div class="wrapper">
+  <p class="notice"><%= notice %></p>
+  <p class="alert"><%= alert %></p>
+
+  <% if author_signed_in? %>
+    Signed in as <%= current_author.email %>.
+    <%= link_to "Sign out", destroy_author_session_path, method: :delete %>
+  <% else %>
+    <%= link_to "Author sign in", new_author_session_path %>
+  <% end %>
+
+  <%= yield %>
+</div>
 ```
