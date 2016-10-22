@@ -3,6 +3,7 @@
 <% @posts.each do |post| %>
   <h2><%= post.title %></h2>
   <p><%= post.body %></p>
+  <p><%= pluralize post.comments.count, "comment" %>
   <p><%= link_to "Read more", post %></p>
 <% end %>
 

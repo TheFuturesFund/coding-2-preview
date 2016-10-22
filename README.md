@@ -111,3 +111,113 @@ a:hover {
   width: 900px;
 }
 ```
+
+# Step 5: Add comments
+
+Now we have a blog that is looking pretty nice. Let's add commenting.
+Comments don't need all the functionality of a scaffold, so let's bootstrap them ourselves.
+
+We can start by generate a model and a controller for comments:
+
+```shell
+rails g model Comment body:text author_name:string post_id:integer
+rails g controller comments create
+rails db:migrate
+```
+
+Then we'll want to wire up the routes for our new comments controller.
+In `config/routes.rb` add:
+
+```ruby
+resources :posts do
+  resources :comments, only: :create
+end
+```
+
+We need to setup the relationship between comments and posts in the `app/models/comment.rb`:
+
+```ruby
+class Comment < ApplicationRecord
+  belongs_to :post
+end
+```
+
+...and in `app/models/post.rb`
+
+```ruby
+class Post < ApplicationRecord
+  has_many :comments
+end
+```
+
+Now let's flesh out the create action in `app/controllers/comments_controller.rb`.
+
+```ruby
+def create
+  @comment = Comment.new(comment_params)
+  @comment.post = Post.find(params[:post_id])
+
+  if @comment.save
+    redirect_to @comment.post, notice: 'Comment was successfully created'
+  else
+    render "post/show"
+  end
+end
+
+def comment_params
+  params.require(:comment).permit(
+    :body,
+    :author_name,
+  )
+end
+```
+
+Finally, we need to add views for comments:
+
+In `app/views/posts/index.html.erb`, let's show how many comments each post has:
+
+```erb
+<% @posts.each do |post| %>
+  <h2><%= post.title %></h2>
+  <p><%= post.body %></p>
+  <p><%= pluralize post.comments.count, "comment" %>
+  <p><%= link_to "Read more", post %></p>
+<% end %>
+```
+
+In `app/views/posts/show.html.erb`, let's show the comments on a post and add a new form to add a new comment:
+
+```erb
+<h2>Comments</h2>
+
+<% @post.comments.each do |comment| %>
+  <h5><%= comment.author_name %> said: </h5>
+  <p><%= comment.body %></p>
+<% end %>
+
+<h4>New Comment:</h4>
+
+<%= form_for([@post, @comment]) do |f| %>
+  <div class="field">
+    <%= f.label :author_name %><br/>
+    <%= f.text_field :author_name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :body %><br/>
+    <%= f.text_area :body %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+```
+
+In order to use `@comment` in the view we need to add it to the posts controller's `show` method in `app/controllers/posts_controller.rb`:
+
+```ruby
+def show
+  @comment = Comment.new
+end
+```
